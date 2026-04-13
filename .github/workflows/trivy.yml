@@ -1,10 +1,10 @@
-name: Trivy Scan \
+name: Trivy Scan 
 
 on:
-  push:
-    branches:
-      - ci-pipeline
-      - main
+  workflow_run:
+    workflows: ["Docker Build (Manual Tag)"]
+    types:
+        - completed
 
 jobs:
   scan_push:
