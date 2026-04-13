@@ -24,7 +24,7 @@ jobs:
       - name: Trivy Scan
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ secrets.DOCKER_USERNAME }}/frontend-app:latest
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/inventory:latest
           exit-code: 0
           severity: CRITICAL,HIGH
 
