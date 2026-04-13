@@ -20,7 +20,7 @@ jobs:
       run: echo "IMAGE_TAG=${GITHUB_REF_NAME}-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
 
     - name: Build Docker Image
-      run: docker build -t suwetha07/app:$IMAGE_TAG .
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/inventory:latest ./
 
  
     - name: Trivy Scan
@@ -37,4 +37,4 @@ jobs:
 
    
     - name: Push Docker Image
-      run: docker push suwetha07/app:$IMAGE_TAG
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/inventory:latest ./
