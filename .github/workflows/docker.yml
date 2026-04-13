@@ -1,6 +1,15 @@
 name: Docker Build (Manual Tag)
 
 on:
+  workflow_run:
+    workflows: ["Code Quality Pipeline "]
+    types:
+      - completed
+    branches:
+      - main
+      - ci-pipeline
+
+
   workflow_dispatch:
     inputs:
       image_tag:
