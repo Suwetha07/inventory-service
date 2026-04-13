@@ -1,0 +1,41 @@
+name: Trivy Scan + Push Docker Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Enter same Docker Image Tag used in build"
+        required: true
+
+jobs:
+  scan_push:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set Image Tag
+      run: echo "IMAGE_TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV
+
+    # Build again (no artifacts used)
+    - name: Build Docker Image
+      run: docker build -t suwetha07/app:$IMAGE_TAG .
+
+    # Trivy Scan
+    - name: Trivy Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: suwetha07/app:$IMAGE_TAG
+        format: table
+        severity: CRITICAL,HIGH
+        exit-code: 1
+
+    # Docker Login
+    - name: Docker Login
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    # Push Image
+    - name: Push Docker Image
+      run: docker push suwetha07/app:$IMAGE_TAG
