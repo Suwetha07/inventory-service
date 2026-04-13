@@ -37,4 +37,4 @@ jobs:
 
    
     - name: Push Docker Image
-      run: docker push ${{ secrets.DOCKER_USERNAME }}/inventory:latest ./
+      run: docker push suwetha07/app:$IMAGE_TAG
