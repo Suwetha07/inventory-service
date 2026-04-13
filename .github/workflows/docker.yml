@@ -1,0 +1,32 @@
+name: Docker Build (Manual Tag)
+
+on:
+  workflow_run:
+    workflows: ["Code Quality Pipeline "]
+    types:
+      - completed
+    branches:
+      - main
+      - ci-pipeline
+
+
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Enter Docker Image Tag (e.g., v1.0.0)"
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set Image Tag
+      run: echo "IMAGE_TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV
+
+    - name: Build Docker Image
+      run: docker build -t suwetha07/app:$IMAGE_TAG .
