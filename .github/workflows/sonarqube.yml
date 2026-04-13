@@ -5,6 +5,10 @@ on:
     branches:
       - ci-pipeline
       - main
+  pull_request:
+    branches:
+      - main
+      
 
 jobs:
   quality:
