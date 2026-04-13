@@ -1,11 +1,10 @@
 name: Trivy Scan + Push Docker Image
 
 on:
-  workflow_dispatch:
-    inputs:
-      image_tag:
-        description: "Enter same Docker Image Tag used in build"
-        required: true
+  workflow_run:
+    workflows: ["Docker Build (Manual Tag)"]
+    types:
+        - completed
 
 jobs:
   scan_push:
