@@ -1,4 +1,4 @@
-name: Trivy Scan + Push Docker Image
+name: Trivy Scan 
 
 on:
   workflow_run:
@@ -15,14 +15,14 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
+    
     - name: Set Image Tag
-      run: echo "IMAGE_TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV
+      run: echo "IMAGE_TAG=${GITHUB_REF_NAME}-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
 
-    # Build again (no artifacts used)
     - name: Build Docker Image
-      run: docker build -t suwetha07/app:$IMAGE_TAG .
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/inventory:latest ./
 
-    # Trivy Scan
+ 
     - name: Trivy Scan
       uses: aquasecurity/trivy-action@master
       with:
@@ -31,10 +31,10 @@ jobs:
         severity: CRITICAL,HIGH
         exit-code: 1
 
-    # Docker Login
+   
     - name: Docker Login
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-    # Push Image
+   
     - name: Push Docker Image
       run: docker push suwetha07/app:$IMAGE_TAG
