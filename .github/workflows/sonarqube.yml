@@ -1,0 +1,75 @@
+
+name: CI Pipeline (SonarQube → Snyk → Docker)
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Enter Docker Image Tag (e.g., v1.0.0)"
+        required: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+
+
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install Dependencies
+      run: npm install
+
+
+    - name: Run Tests
+      run: npm test
+
+    
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v2
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+
+    - name: SonarQube Quality Gate
+      uses: SonarSource/sonarqube-quality-gate-action@v1
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    
+    - name: Snyk Test
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        command: test
+
+    #
+    - name: Build Docker Image
+      run: docker build -t suwetha07/app:temp .
+
+    
+    - name: Set Image Tag
+      run: |
+        docker tag suwetha07/app:temp suwetha07/app:${{ github.event.inputs.image_tag }}
+
+    - name: Snyk Container Scan
+      run: |
+        npm install -g snyk
+        snyk auth ${{ secrets.SNYK_TOKEN }}
+        snyk container test suwetha07/app:${{ github.event.inputs.image_tag }}
+
+
+    - name: Docker Login
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: Push Docker Image
+      run: docker push suwetha07/app:${{ github.event.inputs.image_tag }}
